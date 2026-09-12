@@ -1,0 +1,21 @@
+# Cloudflare Pages static-asset headers.
+# Place this file in the deployed root (the project root here).
+# Files with no build step have no content hashes, so JS/HTML must not be cached
+# aggressively or users keep stale code after a redeploy.
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  X-Frame-Options: DENY
+
+/index.html
+  Cache-Control: no-cache
+
+/src/*
+  Cache-Control: no-cache
+
+/assets/*
+  Cache-Control: public, max-age=3600
+
+/samples/*
+  Cache-Control: public, max-age=86400

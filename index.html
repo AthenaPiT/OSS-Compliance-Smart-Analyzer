@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OSS Compliance Smart Analyzer - SPDX SBOM copyleft risk</title>
+<link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>OSS Compliance Smart Analyzer</h1>
+    <small id="hdr-sub">SPDX SBOM &middot; copyleft risk &middot; automotive</small>
+  </div>
+  <div class="spacer"></div>
+  <button id="btn-export-json" hidden>Export JSON report</button>
+  <button id="btn-export-csv" hidden>Export CSV</button>
+  <button id="btn-compare" hidden>Compare with previous release...</button>
+  <button id="btn-new">Load another SBOM</button>
+  <input type="file" id="file2" accept=".json,.spdx.json,application/json" hidden />
+</header>
+
+<main>
+  <div id="dropzone">
+    <h2>Drop the supplier's SPDX SBOM here</h2>
+    <p>SPDX 2.2 / 2.3 JSON (<code>.spdx.json</code>). Everything runs locally in your browser - no data leaves this machine.</p>
+    <div class="row">
+      <button class="primary" id="btn-pick">Choose file</button>
+      <button id="btn-sample">Load demo SBOM (IVI / cockpit 4.2.0)</button>
+      <button id="btn-sample-diff">Demo milestone diff (4.1.0 → 4.2.0)</button>
+    </div>
+    <input type="file" id="file" accept=".json,.spdx.json,application/json" hidden />
+    <p class="note">Tip: load the SPDX of a previous release to diff license changes between milestones.</p>
+  </div>
+
+  <div id="dashboard" hidden>
+    <div class="banner">
+      Engineering triage only. Every CRITICAL / HIGH finding must be confirmed by legal counsel and by the
+      supplier's own OSS review board before a release gate is signed off.
+    </div>
+
+    <div id="diff-card"></div>
+
+    <div class="grid kpi" id="kpis"></div>
+
+    <div class="grid two" style="margin-top:14px">
+      <div class="card">
+        <h2>License distribution <span class="tag">by component count</span></h2>
+        <div id="license-chart"></div>
+      </div>
+      <div class="card">
+        <h2>SBOM quality <span class="tag">NTIA minimum elements + audit checks</span></h2>
+        <div id="quality"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h2>Dependency graph <span class="tag">click a node for details &middot; drag to pan &middot; wheel to zoom</span></h2>
+      <div class="toolbar">
+        <input type="text" id="g-search" placeholder="Filter components (name or license)..." style="width:280px" />
+        <select id="g-tier">
+          <option value="">All risk tiers</option>
+          <option value="CRITICAL">Critical only</option>
+          <option value="HIGH">High and above</option>
+          <option value="UNKNOWN">Unknown only</option>
+        </select>
+        <select id="g-link">
+          <option value="">All linkage</option>
+          <option value="static">Static link only</option>
+          <option value="dynamic">Dynamic link only</option>
+        </select>
+        <button id="g-reset">Reset view</button>
+        <span class="muted" id="g-stat"></span>
+      </div>
+      <div id="graph-wrap"><div id="graph"></div>
+        <div class="legend">
+          <div><span class="dot" style="background:#ff4d4f"></span>Critical - strong / network copyleft</div>
+          <div><span class="dot" style="background:#ff9f43"></span>High - weak / file copyleft</div>
+          <div><span class="dot" style="background:#ffd166"></span>Medium - conditional</div>
+          <div><span class="dot" style="background:#2ecc71"></span>Low - permissive</div>
+          <div><span class="dot" style="background:#8b9bb4"></span>Unknown / custom</div>
+          <div style="margin-top:6px">Red edge = STATIC_LINK &middot; Blue = DYNAMIC_LINK &middot; Dashed = build/dev</div>
+        </div>
+        <div class="hint">Ring around a node = tainted by transitive copyleft</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h2>Findings <span class="tag" id="findings-count"></span></h2>
+      <div class="toolbar">
+        <select id="f-sev">
+          <option value="">All severities</option>
+          <option value="CRITICAL">Critical</option>
+          <option value="HIGH">High</option>
+          <option value="MEDIUM">Medium</option>
+        </select>
+        <input type="text" id="f-search" placeholder="Search title or component..." style="width:280px" />
+      </div>
+      <div class="scroll">
+        <table id="findings">
+          <thead><tr><th style="width:88px">Severity</th><th style="width:70px">Rule</th><th>Finding</th><th style="width:34%">Obligation</th><th style="width:26%">Recommended action</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h2>Component inventory <span class="tag" id="comp-count"></span></h2>
+      <div class="toolbar">
+        <input type="text" id="c-search" placeholder="Search name, license, purl, supplier..." style="width:320px" />
+        <select id="c-tier">
+          <option value="">All tiers</option>
+          <option value="CRITICAL">Critical</option>
+          <option value="HIGH">High</option>
+          <option value="MEDIUM">Medium</option>
+          <option value="LOW">Low</option>
+          <option value="UNKNOWN">Unknown</option>
+        </select>
+      </div>
+      <div class="scroll">
+        <table id="components">
+          <thead><tr><th>Component</th><th style="width:110px">Version</th><th style="width:210px">Effective license</th><th style="width:78px">Risk</th><th style="width:180px">Copyleft inherited from</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="detail" role="dialog" aria-label="Component detail">
+  <span class="close" id="detail-close">close &times;</span>
+  <div id="detail-body"></div>
+</div>
+
+<script type="module" src="src/app.js"></script>
+</body>
+</html>

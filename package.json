@@ -1,0 +1,14 @@
+{
+  "name": "oss-compliance-analyzer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "OSS Compliance Smart Analyzer - SPDX SBOM visualization and copyleft risk assessment for automotive in-vehicle software",
+  "scripts": {
+    "start": "python -m http.server 8080",
+    "smoke": "node tools/smoke-test.mjs",
+    "smoke:ui": "node tools/ui-smoke-test.mjs",
+    "build:static": "node scripts/build-static.mjs",
+    "deploy:pages": "npm run build:static && wrangler pages deploy dist --project-name oss-compliance"
+  }
+}
