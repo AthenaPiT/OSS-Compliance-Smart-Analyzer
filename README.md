@@ -110,6 +110,18 @@ npm run smoke        # engine + diff + reports, no dependencies
 npm run smoke:ui     # dashboard in jsdom (npm i -D jsdom, or set JSDOM_ENTRY)
 ```
 
+## Design documentation
+
+Archived by work deliverable under [`docs/`](docs/):
+
+| Folder | Document |
+|---|---|
+| [`docs/01-project-management/`](docs/01-project-management/) | Project management plan |
+| [`docs/02-requirements-analysis/`](docs/02-requirements-analysis/) | Requirements specification |
+| [`docs/03-conceptual-design/`](docs/03-conceptual-design/) | Conceptual design |
+| [`docs/04-architecture-design/`](docs/04-architecture-design/) | Architecture design |
+| [`docs/05-testing/`](docs/05-testing/) | Smoke test report |
+
 ---
 
 # Building it step by step
