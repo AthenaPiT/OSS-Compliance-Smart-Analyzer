@@ -1,3 +1,5 @@
+![OSCA](./image/OCSAlogo.png)
+---
 # OSS Compliance Smart Analyzer
 
 SPDX SBOM visualisation + copyleft risk assessment for in-vehicle software.
